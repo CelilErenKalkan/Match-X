@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,14 +13,29 @@ public class Board : MonoBehaviour
 
     private void Awake()
     {
-        tileMatrix = TileSpawner.CreateTileMatrix(tilePrefab, transform, width, height, out _);
+        GenerateBoard(width, height);
         Actions.TileSelected += OnTileSelected;
-        CameraAdjuster.FitCameraToRenderers(Camera.main, GetComponentsInChildren<Renderer>());
     }
 
     private void OnDestroy()
     {
         Actions.TileSelected -= OnTileSelected;
+    }
+
+    public void GenerateBoard(int newWidth, int newHeight)
+    {
+        width = newWidth;
+        height = newHeight;
+
+        // Clear previous tiles
+        foreach (Transform child in transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        // Create new tile matrix
+        tileMatrix = TileSpawner.CreateTileMatrix(tilePrefab, transform, width, height, out _);
+        StartCoroutine(FitCameraNextFrame());
     }
 
     private void OnTileSelected(Tile tile)
@@ -30,7 +46,13 @@ public class Board : MonoBehaviour
         checkCoroutine = StartCoroutine(DelayedCheck(tile));
     }
 
-    private System.Collections.IEnumerator DelayedCheck(Tile tile)
+    private IEnumerator FitCameraNextFrame()
+    {
+        yield return null; // Wait one frame to ensure old tiles are destroyed
+        CameraAdjuster.FitCameraToRenderers(Camera.main, GetComponentsInChildren<Renderer>());
+    }
+
+    private IEnumerator DelayedCheck(Tile tile)
     {
         yield return new WaitForSeconds(0.3f);
 
@@ -44,7 +66,10 @@ public class Board : MonoBehaviour
                     if (group.Count >= 3)
                     {
                         foreach (var (gx, gy) in group)
+                        {
                             tileMatrix[gx, gy].ResetTile();
+                        }
+                        Actions.Match?.Invoke();
                     }
                     yield break;
                 }

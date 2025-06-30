@@ -44,7 +44,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab95c7000c3a55428b06bbd3d98cd82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  columns: 5
-  rows: 5
-  gridPrefab: {fileID: 6943753733799923287, guid: a2780251a98608c458646ec5e412b4ee, type: 3}
-  spacing: 0.05
+  tilePrefab: {fileID: 6943753733799923287, guid: a2780251a98608c458646ec5e412b4ee, type: 3}
+  width: 4
+  height: 4
