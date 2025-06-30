@@ -12,6 +12,6 @@ public class UIManager : MonoBehaviour
 
     public void GameStartButton()
     {
-        ButtonTapped?.Invoke();
+        GridSelected?.Invoke();
     }
 }

@@ -2,5 +2,5 @@ using System;
 
 public static class Actions
 {
-    public static Action ButtonTapped;
+    public static Action GridSelected;
 }

@@ -124,5 +124,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eebe85fa01064004db7be0d2997f9574, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  emptySprite: {fileID: 21300000, guid: 5da6f4019d18aca47bbb35cc532b84cb, type: 3}
-  selectedSprite: {fileID: 21300000, guid: 4b532e00b49a4574eb34b3f3dba1b2a9, type: 3}
+  firstSprite: {fileID: 21300000, guid: 5da6f4019d18aca47bbb35cc532b84cb, type: 3}
+  secondSprite: {fileID: 21300000, guid: 4b532e00b49a4574eb34b3f3dba1b2a9, type: 3}

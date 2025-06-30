@@ -1,23 +1,25 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Board : MonoBehaviour
 {
-    public GameObject grid;
+    public GameObject gridPrefab;
     public int width;
     public int height;
 
-    private Vector2[,] matrixTransforms;
+    private Grid[,] matrixGrids;
+    private Coroutine checkCoroutine;
 
     private void Awake()
     {
-        if (grid == null)
+        if (gridPrefab == null)
         {
             Debug.LogError("Grid prefab is not assigned!");
             return;
         }
 
         // Instantiate one grid temporarily to get its size
-        GameObject tempGrid = Instantiate(grid);
+        GameObject tempGrid = Instantiate(gridPrefab);
         Renderer gridRenderer = tempGrid.GetComponent<Renderer>();
 
         if (gridRenderer == null)
@@ -30,32 +32,81 @@ public class Board : MonoBehaviour
         Vector3 gridSize = gridRenderer.bounds.size;
         Destroy(tempGrid);
 
-        matrixTransforms = new Vector2[width, height];
+        matrixGrids = new Grid[width, height];
 
-        // Calculate total board size
         float boardWidth = gridSize.x * width;
         float boardHeight = gridSize.y * height;
 
-        // Calculate starting point to center the grid
         float startX = -boardWidth / 2f + gridSize.x / 2f;
         float startY = -boardHeight / 2f + gridSize.y / 2f;
 
-        // Instantiate grids side-by-side with no scaling
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
                 Vector2 pos = new Vector2(startX + x * gridSize.x, startY + y * gridSize.y);
-                matrixTransforms[x, y] = pos;
-
-                GameObject tile = Instantiate(grid, transform);
+                GameObject tile = Instantiate(gridPrefab, transform);
                 tile.transform.localPosition = pos;
                 tile.transform.localScale = Vector3.one;
+
+                Grid gridScript = tile.GetComponent<Grid>();
+                if (gridScript == null)
+                {
+                    Debug.LogError("Grid prefab must have a Grid script attached.");
+                    Destroy(tile);
+                    continue;
+                }
+
+                matrixGrids[x, y] = gridScript;
             }
         }
 
-        // Adjust camera position based on combined bounds of instantiated grids
+        Grid.GridSelected += OnGridSelected;
+
         AdjustCameraZUsingBounds();
+    }
+
+    private void OnDestroy()
+    {
+        Grid.GridSelected -= OnGridSelected;
+    }
+
+    private void OnGridSelected(Grid selectedGrid)
+    {
+        if (checkCoroutine != null)
+            StopCoroutine(checkCoroutine);
+
+        checkCoroutine = StartCoroutine(CheckAfterDelay(selectedGrid));
+    }
+
+    private System.Collections.IEnumerator CheckAfterDelay(Grid selectedGrid)
+    {
+        yield return new WaitForSeconds(0.3f);  // delay to show selection before reset
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (matrixGrids[x, y] == selectedGrid)
+                {
+                    CheckConnectedSelectedGrids(x, y);
+                    yield break;
+                }
+            }
+        }
+    }
+
+    private void CheckConnectedSelectedGrids(int startX, int startY)
+    {
+        List<(int x, int y)> connected = GridClusterFinder.FindConnectedSelectedCluster(matrixGrids, startX, startY);
+
+        if (connected.Count >= 3)
+        {
+            foreach (var (x, y) in connected)
+            {
+                matrixGrids[x, y].ResetGrid();
+            }
+        }
     }
 
     private void AdjustCameraZUsingBounds()
@@ -88,7 +139,6 @@ public class Board : MonoBehaviour
         Vector3 boundsCenter = combinedBounds.center;
         Vector3 boundsSize = combinedBounds.size;
 
-        // Add margin/padding to the bounds size (e.g., 5% padding)
         float marginFactor = 1.02f;
         boundsSize *= marginFactor;
 
@@ -111,5 +161,4 @@ public class Board : MonoBehaviour
 
         cam.transform.position = camPos;
     }
-
 }
