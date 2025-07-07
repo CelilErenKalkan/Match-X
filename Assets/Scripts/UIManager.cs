@@ -13,7 +13,8 @@ public class UIManager : MonoBehaviour
     [Header("Board Reference")]
     public Board board;
 
-    private int matchCount = 0;
+    private int matchCount;
+    private const string CountKey = "Count";
 
     private void Awake()
     {
@@ -27,6 +28,7 @@ public class UIManager : MonoBehaviour
             Actions.Match += OnBoardMatch;
         }
 
+        LoadCount();
         UpdateMatchText();
     }
 
@@ -45,15 +47,15 @@ public class UIManager : MonoBehaviour
 
         if (int.TryParse(rowInputField.text, out int newRows) && int.TryParse(columnInputField.text, out int newCols))
         {
-            matchCount = 0;
             UpdateMatchText();
-            board.GenerateBoard(newCols, newRows); // Note: You must implement this method in your Board class
+            board.GenerateBoard(newCols, newRows);
         }
     }
 
     private void OnBoardMatch()
     {
         matchCount++;
+        SaveCount();
         UpdateMatchText();
     }
 
@@ -63,5 +65,16 @@ public class UIManager : MonoBehaviour
         {
             matchCountText.text = "Count: " + matchCount;
         }
+    }
+    
+    private void SaveCount()
+    {
+        PlayerPrefs.SetInt(CountKey, matchCount);
+        PlayerPrefs.Save();
+    }
+
+    private void LoadCount()
+    {
+        matchCount = PlayerPrefs.GetInt(CountKey, 0); // 0 is the default value if key doesn't exist
     }
 }

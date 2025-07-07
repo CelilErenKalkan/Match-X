@@ -7,12 +7,15 @@ public class Board : MonoBehaviour
     public GameObject tilePrefab;
     public int width;
     public int height;
+    private const string WidthKey = "Width";
+    private const string HeightKey = "Height";
 
     private Tile[,] tileMatrix;
     private Coroutine checkCoroutine;
 
     private void Awake()
     {
+        LoadBoard();
         GenerateBoard(width, height);
         Actions.TileSelected += OnTileSelected;
     }
@@ -50,6 +53,7 @@ public class Board : MonoBehaviour
     {
         yield return null; // Wait one frame to ensure old tiles are destroyed
         CameraAdjuster.FitCameraToRenderers(Camera.main, GetComponentsInChildren<Renderer>());
+        SaveBoard();
     }
 
     private IEnumerator DelayedCheck(Tile tile)
@@ -75,5 +79,18 @@ public class Board : MonoBehaviour
                 }
             }
         }
+    }
+    
+    private void SaveBoard()
+    {
+        PlayerPrefs.SetInt(WidthKey, width);
+        PlayerPrefs.SetInt(HeightKey, height);
+        PlayerPrefs.Save();
+    }
+
+    private void LoadBoard()
+    {
+        width = PlayerPrefs.GetInt(WidthKey, 4); // 4 is the default value if key doesn't exist
+        height = PlayerPrefs.GetInt(HeightKey, 4); // 4 is the default value if key doesn't exist
     }
 }

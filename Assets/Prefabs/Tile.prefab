@@ -126,3 +126,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   defaultSprite: {fileID: 21300000, guid: 5da6f4019d18aca47bbb35cc532b84cb, type: 3}
   selectedSprite: {fileID: 21300000, guid: 4b532e00b49a4574eb34b3f3dba1b2a9, type: 3}
+  darkenDuration: 0.1
+  darkenAmount: 0.9
